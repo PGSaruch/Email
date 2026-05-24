@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Email Compose Tool</title>
+  <link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700&display=swap" rel="stylesheet">
+  <style>
+    :root, [data-theme="light"] {
+      --text-xs: clamp(0.75rem, 0.7rem + 0.25vw, 0.875rem);
+      --text-sm: clamp(0.875rem, 0.8rem + 0.35vw, 1rem);
+      --text-base: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
+      --text-lg: clamp(1.125rem, 1rem + 0.75vw, 1.5rem);
+      --text-xl: clamp(1.5rem, 1.2rem + 1.25vw, 2.25rem);
+      --space-2: 0.5rem; --space-3: 0.75rem; --space-4: 1rem; --space-5: 1.25rem; --space-6: 1.5rem; --space-8: 2rem;
+      --color-bg: #f7f6f2; --color-surface: #f9f8f5; --color-surface-2: #fbfbf9; --color-surface-offset: #f3f0ec;
+      --color-divider: #dcd9d5; --color-text: #28251d; --color-text-muted: #6f6d67; --color-text-inverse: #f9f8f4;
+      --color-primary: #01696f; --color-primary-hover: #0c4e54; --color-primary-highlight: #cedcd8;
+      --radius-md: 0.5rem; --radius-lg: 0.75rem; --radius-xl: 1rem;
+      --shadow-sm: 0 1px 2px rgba(40,37,29,0.06); --shadow-md: 0 8px 24px rgba(40,37,29,0.08);
+      --transition-interactive: 180ms cubic-bezier(0.16, 1, 0.3, 1);
+      --font-body: 'Satoshi', 'Inter', sans-serif; --font-display: 'Satoshi', 'Inter', sans-serif;
+    }
+    [data-theme="dark"] {
+      --color-bg: #171614; --color-surface: #1c1b19; --color-surface-2: #201f1d; --color-surface-offset: #22211f;
+      --color-divider: #262523; --color-text: #cdccca; --color-text-muted: #9a9894; --color-text-inverse: #171614;
+      --color-primary: #4f98a3; --color-primary-hover: #66aab3; --color-primary-highlight: #313b3b;
+      --shadow-sm: 0 1px 2px rgba(0,0,0,0.2); --shadow-md: 0 12px 32px rgba(0,0,0,0.35);
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html{-webkit-text-size-adjust:none;text-size-adjust:none}
+    body{min-height:100dvh;line-height:1.6;font-family:var(--font-body);font-size:var(--text-base);color:var(--color-text);background:linear-gradient(180deg,var(--color-bg),var(--color-surface-offset))}
+    button,input,textarea,select{font:inherit;color:inherit} button{cursor:pointer;border:none} textarea{resize:vertical}
+    a,button,input,textarea,select{transition:color var(--transition-interactive),background var(--transition-interactive),border-color var(--transition-interactive),box-shadow var(--transition-interactive)}
+    :focus-visible{outline:2px solid var(--color-primary);outline-offset:3px}
+    .skip-link{position:absolute;left:1rem;top:-40px;background:var(--color-primary);color:var(--color-text-inverse);padding:.5rem 1rem;border-radius:var(--radius-md);z-index:10}.skip-link:focus{top:1rem}
+    .shell{max-width:1220px;margin:0 auto;padding:var(--space-6)}
+    .topbar{display:flex;justify-content:space-between;align-items:center;gap:var(--space-4);margin-bottom:var(--space-8)}
+    .brand{display:flex;align-items:center;gap:var(--space-3)}
+    .brand-mark{width:42px;height:42px;border-radius:14px;background:var(--color-surface);display:grid;place-items:center;box-shadow:var(--shadow-sm);color:var(--color-primary)}
+    .brand h1{font-family:var(--font-display);font-size:var(--text-xl);line-height:1.1}
+    .brand p{color:var(--color-text-muted);font-size:var(--text-sm)}
+    .theme-toggle{min-width:44px;min-height:44px;padding:.7rem;border-radius:999px;background:var(--color-surface);box-shadow:var(--shadow-sm)}
+    .grid{display:grid;grid-template-columns:1.1fr .9fr;gap:var(--space-6);align-items:start}
+    .panel{background:color-mix(in srgb,var(--color-surface) 90%,transparent);border:1px solid color-mix(in srgb,var(--color-text) 10%,transparent);border-radius:var(--radius-xl);box-shadow:var(--shadow-md)}
+    .panel-head{padding:var(--space-6) var(--space-6) var(--space-4);border-bottom:1px solid var(--color-divider)}
+    .panel-head h2{font-size:var(--text-lg);line-height:1.15}.panel-head p{margin-top:var(--space-2);color:var(--color-text-muted);font-size:var(--text-sm)}
+    .panel-body{padding:var(--space-6)}
+    .form-grid,.preview-wrap{display:grid;gap:var(--space-4)}
+    .field{display:grid;gap:var(--space-2)}
+    .field label,.field legend{font-size:var(--text-sm);font-weight:700}
+    .field input,.field textarea,.field select{width:100%;min-height:48px;padding:.9rem 1rem;border-radius:var(--radius-lg);border:1px solid color-mix(in srgb,var(--color-text) 12%,transparent);background:var(--color-surface-2)}
+    .field textarea{min-height:96px}
+    .field-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:var(--space-4)}
+    .chips{display:flex;flex-wrap:wrap;gap:var(--space-2)}
+    .chip{display:flex;align-items:center;gap:.45rem;padding:.7rem .9rem;border-radius:999px;background:var(--color-surface-2);border:1px solid color-mix(in srgb,var(--color-text) 10%,transparent)}
+    .note{padding:var(--space-4);border-radius:var(--radius-lg);background:color-mix(in srgb,var(--color-primary) 8%, var(--color-surface));color:var(--color-text);font-size:var(--text-sm);border:1px solid color-mix(in srgb,var(--color-primary) 18%, transparent)}
+    .actions{display:flex;flex-wrap:wrap;gap:var(--space-3)}
+    .btn{min-height:44px;padding:.8rem 1.1rem;border-radius:var(--radius-lg);font-size:var(--text-sm);font-weight:700;border:1px solid transparent}
+    .btn-primary{background:var(--color-primary);color:var(--color-text-inverse)} .btn-primary:hover{background:var(--color-primary-hover)}
+    .btn-secondary{background:var(--color-surface);border-color:color-mix(in srgb,var(--color-text) 10%,transparent)}
+    .btn-ghost{background:transparent;border-color:color-mix(in srgb,var(--color-text) 12%,transparent)}
+    .status{display:inline-flex;width:fit-content;padding:.35rem .7rem;border-radius:999px;background:var(--color-primary-highlight);color:var(--color-primary);font-size:var(--text-xs);font-weight:700}
+    .preview-box{background:var(--color-surface-2);border:1px solid color-mix(in srgb,var(--color-text) 10%,transparent);border-radius:var(--radius-lg);padding:var(--space-5);min-height:480px;white-space:pre-wrap;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.95rem;line-height:1.7}
+    .helper,.muted{color:var(--color-text-muted);font-size:var(--text-xs)}
+    .subject-box{padding:var(--space-4);border-radius:var(--radius-lg);background:var(--color-surface-offset);border:1px solid color-mix(in srgb,var(--color-text) 10%,transparent)}
+    .subject-box strong{display:block;margin-bottom:.35rem;font-size:var(--text-sm)}
+    @media (max-width:980px){.grid,.field-grid-2{grid-template-columns:1fr}}
+    @media (max-width:640px){.shell{padding:var(--space-4)}.topbar{align-items:flex-start}.brand h1{font-size:1.45rem}.actions{flex-direction:column}.btn{width:100%}.preview-box{min-height:320px}}
+    @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#main">ข้ามไปยังเนื้อหา</a>
+  <div class="shell">
+    <header class="topbar">
+      <div class="brand" aria-label="Email Compose Tool">
+        <div class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 48 48" width="24" height="24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="7" y="11" width="34" height="25" rx="6" stroke="currentColor" stroke-width="3"/>
+            <path d="M12 16L24 25L36 16" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div>
+          <h1>Email Compose Tool</h1>
+          <p>เลือก Subject ได้ทั้ง ECO, STD, ECO/STD และ Technical Inquiry</p>
+        </div>
+      </div>
+      <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+    </header>
+
+    <main id="main" class="grid">
+      <section class="panel" aria-labelledby="form-title">
+        <div class="panel-head">
+          <h2 id="form-title">กรอกข้อมูล</h2>
+          <p>รองรับ 2 format หลัก คือ Code_Identify และ Technical Inquiry พร้อมจัด Subject ให้อัตโนมัติ</p>
+        </div>
+        <div class="panel-body">
+          <form id="emailForm" class="form-grid">
+            <div class="field">
+              <label for="formatType">ประเภทการคุยกับเทค</label>
+              <select id="formatType">
+                <option value="identify">Code_Identify</option>
+                <option value="technical">Technical Inquiry</option>
+              </select>
+            </div>
+
+            <div class="field-grid-2">
+              <div class="field">
+                <label for="cuCodePrefix">CU Code หน้า Subject</label>
+                <input id="cuCodePrefix" type="text" placeholder="เช่น W00DRS หรือ W00I5C" />
+              </div>
+              <div class="field">
+                <label for="itemCount">จำนวนรายการสินค้า (#Code)</label>
+                <input id="itemCount" type="number" min="1" step="1" value="1" />
+              </div>
+            </div>
+
+            <fieldset class="field">
+              <legend>กลุ่มสินค้าใน Subject</legend>
+              <div class="chips">
+                <label class="chip"><input type="checkbox" id="eco" checked /> ECO</label>
+                <label class="chip"><input type="checkbox" id="std" /> STD</label>
+              </div>
+              <p class="helper">ถ้าต้องการลำดับก่อนหลัง ให้เลือกที่ช่องลำดับด้านล่าง</p>
+            </fieldset>
+
+            <div class="field">
+              <label for="subjectOrder">ลำดับกลุ่มสินค้า</label>
+              <select id="subjectOrder">
+                <option value="eco-std">(ECO)(STD)</option>
+                <option value="std-eco">(STD)(ECO)</option>
+              </select>
+            </div>
+
+            <div class="subject-box">
+              <strong>Subject Preview</strong>
+              <div id="subjectPreview"></div>
+            </div>
+
+            <div class="field"><label for="dear">Dear</label><input id="dear" type="text" value="ME-TS TEAM" /></div>
+            <div class="field"><label for="intro">ข้อความเกริ่นก่อน Original Product Info</label><textarea id="intro">Please recommend and convert part list as ECO product.</textarea></div>
+            <div class="field"><label for="productCd">Product_CD :</label><input id="productCd" type="text" /></div>
+            <div class="field"><label for="productSpec">Product spec:</label><textarea id="productSpec"></textarea></div>
+            <div class="field"><label for="productName">Product Name:</label><input id="productName" type="text" /></div>
+            <div class="field"><label for="brand">Brand :</label><input id="brand" type="text" /></div>
+            <div class="field"><label for="cuCodeName">CU Code/Name :</label><input id="cuCodeName" type="text" /></div>
+            <div class="field"><label for="contact">Name/Tel :</label><input id="contact" type="text" /></div>
+            <div class="field"><label for="feedbackDate">CU request date for feedback :</label><input id="feedbackDate" type="text" placeholder="เช่น within 28/01/2026" /></div>
+
+            <div class="note" id="modeNote"></div>
+
+            <div class="actions">
+              <button class="btn btn-primary" type="button" id="copyBtn">Copy Email</button>
+              <button class="btn btn-secondary" type="button" id="copySubjectBtn">Copy Subject</button>
+              <button class="btn btn-ghost" type="reset">Reset</button>
+            </div>
+          </form>
+        </div>
+      </section>
+
+      <section class="panel" aria-labelledby="preview-title">
+        <div class="panel-head">
+          <h2 id="preview-title">Preview</h2>
+          <p>ด้านล่างคือข้อความที่เตรียมไว้สำหรับนำไปวางใน email ตามรูปแบบที่คุณอธิบาย</p>
+        </div>
+        <div class="panel-body preview-wrap">
+          <div class="status" id="copyStatus">พร้อม copy</div>
+          <div id="preview" class="preview-box" aria-live="polite"></div>
+          <p class="muted">Technical Inquiry เหมาะกับการถามรายละเอียดหรือสเปคเพิ่มเติม และควรมีรหัสสินค้าตั้งต้นที่สมบูรณ์ก่อนส่งถาม</p>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const fields = {
+      formatType: document.getElementById('formatType'),
+      cuCodePrefix: document.getElementById('cuCodePrefix'),
+      itemCount: document.getElementById('itemCount'),
+      eco: document.getElementById('eco'),
+      std: document.getElementById('std'),
+      subjectOrder: document.getElementById('subjectOrder'),
+      dear: document.getElementById('dear'),
+      intro: document.getElementById('intro'),
+      productCd: document.getElementById('productCd'),
+      productSpec: document.getElementById('productSpec'),
+      productName: document.getElementById('productName'),
+      brand: document.getElementById('brand'),
+      cuCodeName: document.getElementById('cuCodeName'),
+      contact: document.getElementById('contact'),
+      feedbackDate: document.getElementById('feedbackDate')
+    };
+
+    const preview = document.getElementById('preview');
+    const subjectPreview = document.getElementById('subjectPreview');
+    const copyBtn = document.getElementById('copyBtn');
+    const copySubjectBtn = document.getElementById('copySubjectBtn');
+    const copyStatus = document.getElementById('copyStatus');
+    const form = document.getElementById('emailForm');
+    const modeNote = document.getElementById('modeNote');
+    const themeToggle = document.querySelector('[data-theme-toggle]');
+    const root = document.documentElement;
+    let currentTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+
+    function setTheme(theme) {
+      currentTheme = theme;
+      root.setAttribute('data-theme', theme);
+      themeToggle.setAttribute('aria-label', 'Switch to ' + (theme === 'dark' ? 'light' : 'dark') + ' mode');
+      themeToggle.innerHTML = theme === 'dark'
+        ? '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>'
+        : '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>';
+    }
+
+    function v(el) { return el.value.trim(); }
+
+    function subjectGroups() {
+      const order = fields.subjectOrder.value === 'std-eco' ? ['STD', 'ECO'] : ['ECO', 'STD'];
+      return order.filter((group) => group === 'ECO' ? fields.eco.checked : fields.std.checked);
+    }
+
+    function composeSubject() {
+      const prefix = v(fields.cuCodePrefix);
+      const count = v(fields.itemCount) || '1';
+      const mode = fields.formatType.value;
+      const groups = subjectGroups().map((group) => `(${group})`).join('');
+      const tail = mode === 'technical' ? 'Technical Inquiry' : 'Code_Identify';
+      return `(${prefix})${groups}_${tail}#Code=${count}`;
+    }
+
+    function composeEmail() {
+      const subject = composeSubject();
+      return [
+        'Subject : ' + subject,
+        '',
+        'Dear ' + v(fields.dear),
+        '',
+        v(fields.intro),
+        '',
+        'Original Product Info',
+        'Product_CD : ' + v(fields.productCd),
+        'Product spec: ' + v(fields.productSpec),
+        'Product Name: ' + v(fields.productName),
+        'Brand : ' + v(fields.brand),
+        'CU Code/Name : ' + v(fields.cuCodeName),
+        'Name/Tel : ' + v(fields.contact),
+        'CU request date for feedback : ' + v(fields.feedbackDate)
+      ].join('\n');
+    }
+
+    function updateModeNote() {
+      if (fields.formatType.value === 'technical') {
+        modeNote.textContent = 'Technical Inquiry: ใช้สำหรับสอบถามรายละเอียดเพิ่มเติมของสินค้า เช่น ความหนา การใช้งาน หรือความเหมาะสมของสินค้า และควรมีรหัสสินค้าตั้งต้นที่สมบูรณ์';
+      } else {
+        modeNote.textContent = 'Code_Identify: ใช้สำหรับขอ recommend และ convert part list เป็น ECO, STD หรือ ECO/STD โดยสามารถสลับลำดับกลุ่มสินค้าใน Subject ได้';
+      }
+    }
+
+    function updatePreview() {
+      const subject = composeSubject();
+      subjectPreview.textContent = subject;
+      preview.textContent = composeEmail();
+      updateModeNote();
+      copyStatus.textContent = 'พร้อม copy';
+    }
+
+    async function copyText(text, statusText) {
+      try {
+        await navigator.clipboard.writeText(text);
+      } catch (error) {
+        const temp = document.createElement('textarea');
+        temp.value = text;
+        document.body.appendChild(temp);
+        temp.select();
+        document.execCommand('copy');
+        document.body.removeChild(temp);
+      }
+      copyStatus.textContent = statusText;
+    }
+
+    Object.values(fields).forEach((field) => {
+      const eventType = field.type === 'checkbox' || field.tagName === 'SELECT' ? 'change' : 'input';
+      field.addEventListener(eventType, updatePreview);
+      if (eventType !== 'input') field.addEventListener('input', updatePreview);
+    });
+
+    form.addEventListener('reset', () => {
+      setTimeout(() => {
+        fields.dear.value = 'ME-TS TEAM';
+        fields.intro.value = 'Please recommend and convert part list as ECO product.';
+        fields.itemCount.value = '1';
+        fields.eco.checked = true;
+        fields.std.checked = false;
+        fields.subjectOrder.value = 'eco-std';
+        fields.formatType.value = 'identify';
+        updatePreview();
+      }, 0);
+    });
+
+    copyBtn.addEventListener('click', () => copyText(composeEmail(), 'คัดลอก Email แล้ว'));
+    copySubjectBtn.addEventListener('click', () => copyText(composeSubject(), 'คัดลอก Subject แล้ว'));
+    themeToggle.addEventListener('click', () => setTheme(currentTheme === 'dark' ? 'light' : 'dark'));
+
+    setTheme(currentTheme);
+    updatePreview();
+  </script>
+</body>
+</html>
